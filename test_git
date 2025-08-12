@@ -1,0 +1,19 @@
+#!/bin/bash
+
+rm -f git_times.csv
+average_str="(0.0 "
+
+for i in $(seq 1 10); do
+  rm -f Gemfile.git.lock
+  gem uninstall -aIx > /dev/null
+  gem install bundler:2.7.1 > /dev/null
+  real_time=$((time bundle install --gemfile=Gemfile.git) 2>&1 | awk -F'[ms]' '/^real/ {print $2}')
+  average_str="$average_str + $real_time"
+
+  echo "$i: $real_time seconds"
+  echo "$i, $real_time" >> git_times.csv
+done
+
+average_str="$average_str) / 10.0"
+average=`echo $average_str | bc -l`
+echo "Average: $average"
